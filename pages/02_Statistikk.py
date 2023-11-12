@@ -17,7 +17,6 @@ if not 'bins' in st.session_state:
 st.session_state.update(st.session_state)
 
 corpus = st.session_state['korpus']
-#imag_corpus.corpus.year = imag_corpus.year.astype('int')
 
 counts = st.session_state['counts']
 
@@ -35,28 +34,30 @@ with col2:
 
 
 
-#water_corpus.corpus['bins'] = pd.cut(water_corpus.corpus.year, num, precision=0)
 
-
-#a = water_corpus.corpus.groupby('bins').count()[['dhlabid']]
-
-a = pd.concat([imag_corpus.set_index('urn'), counts], axis = 1).reset_index()[['urn','year', 'freq']].fillna(0)
+a = pd.concat([corpus, counts], axis = 1).reset_index()[['urn','year', 'freq']].fillna(0)
 
 
 st.write(f"Antallet avsnitt som gir treff på __{st.session_state['konk']}__.")
+st.dataframe(counts.sample(100, replace=True))
 
 if vis == 'dataramme':
     st.write(groups)
+
 elif vis == 'søylediagram':
     a['bins'] = pd.cut(a.year, num, precision=0)
     groups = a.groupby('bins').sum()[['freq']]
     groups.index = groups.index.astype(str).map(lambda x: '-'.join(x[1:-1].split(',')))
     st.bar_chart(groups)
+
 elif vis == 'linjediagram':
-    lines = a[['year','freq']].set_index('year')
-    lines.index = pd.to_datetime(lines.index, format="%Y")
+    lines = a[['year','freq']]
+    #lines.year = lines.year.apply(lambda x:int(x))
+    lines = lines.set_index('year')
+    #lines.index = pd.to_datetime(lines.index.astype(int))
     st.line_chart(lines) #.rolling(st.session_state.get('rolling',1)).mean())
     #lines
+
 else:
     pass
 
