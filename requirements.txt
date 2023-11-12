@@ -3,4 +3,4 @@ matplotlib
 pandas
 streamlit
 openpyxl
-bs4
+beautifulsoup4
