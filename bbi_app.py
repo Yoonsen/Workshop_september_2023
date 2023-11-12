@@ -3,6 +3,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 from io import BytesIO
 import re
+import numpy as np
 
 st.set_page_config(page_title="Mangfold i barnebokslitteraturen", page_icon=None, layout="wide", initial_sidebar_state="auto", menu_items=None)
 
@@ -11,12 +12,14 @@ st.write('---')
 
 @st.cache_data()
 def korpus():
-    kudos = pd.read_csv("kudos.csv", index_col = 0).fillna('')
-    barn = pd.read_csv("barn.csv", index_col = 0).fillna('')
-    kudos.year = kudos.year.astype(str)
-    barn.year = barn.year.astype(str)
+    kudos = pd.read_csv("kudos.csv").fillna('').drop_duplicates().fillna('').set_index('dhlabid')
+    barn = pd.read_csv("barn.csv").fillna('').drop_duplicates().fillna('').set_index('dhlabid')
+    barn.year = barn.year.replace('', np.nan)
+    kudos.year = kudos.year.replace('', np.nan)
+    #kudos.year = kudos.year.astype(int)
+    #barn.year = barn.year.astype(int)
     
-    return kudos, barn
+    return kudos.dropna(), barn.dropna()
 
 kudos, barn = korpus()
 
@@ -28,3 +31,5 @@ elif corpus_name == 'barn':
     st.session_state['korpus'] = barn
 
 st.write(f'korpuset inneholder {len(st.session_state["korpus"])} dokumenter')
+st.write("## Et lite utvalg fra korpuset")
+st.dataframe(st.session_state['korpus'].sample(100))
