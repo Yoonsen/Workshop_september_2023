@@ -90,7 +90,7 @@ else:
         st.write(f"Viser alle {concord_dh.size} konkordansene ")
         konkordans = set_html_link_conc(concord_dh, corpus, words)
         
-st.markdown(konkordans.to_html(), unsafe_allow_html=True)
+st.markdown(konkordans.to_html(escape=False), unsafe_allow_html=True)
 
 
 
