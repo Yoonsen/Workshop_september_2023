@@ -1,5 +1,6 @@
 import streamlit as st
-import dhlab.text as dh
+#import dhlab.text as dh
+import dhlab_api as api
 import pandas as pd
 from PIL import Image
 import urllib
@@ -11,8 +12,9 @@ max_conc = 20000
 
 @st.cache_data( show_spinner = False)
 def konk(corpus = None, query = None): 
-    concord = dh.Concordance(corpus, query, limit = max_conc)
-    return concord
+    concord = api.concordance(list(corpus.urn), query, limit = max_conc)
+    #concord = dh.Concordance(corpus, query, limit = max_conc)
+    return concord[['urn','conc']]
 
 
 def set_markdown_link_conc(conc, corpus, query):
@@ -26,8 +28,19 @@ def set_markdown_link_conc(conc, corpus, query):
          'link', 'concordance'
     ]].sort_values(by='link')
 
-
+def set_html_link_conc(conc, corpus, query):
+    try:
+        corps = corpus.set_index('urn')
+        conc['link'] = conc['urn'].apply(lambda c: "<a href='https://www.nb.no/items/{x}?searchText={q}'>{display}</a>".format(x = c, display = f"{corps.loc[c].title} - {corps.loc[c].authors} : {corps.loc[c].year}" , q = urllib.parse.quote(query)))
+    except:
+        st.write('noe')
+        conc['link'] = ""
+        
+    return conc[[
+         'link', 'conc'
+    ]].sort_values(by='link')
 corpus = st.session_state['korpus']
+
 
 
 st.title(f'Søk etter uttrykk i korpuset')
@@ -52,36 +65,33 @@ samplesize = int(
     )
 )
 
-konk = set_markdown_link_conc(
-concord_dh.show(
-    style=False, 
-    n=int(samplesize)
-), 
-corpus, 
-words
-)
+#konk = set_markdown_link_conc(
+#concord_dh(
+#    style=False, 
+#    n=int(samplesize)
+#), 
+#corpus, 
+#words
+#)
 
-    
+
 st.markdown(f"## Konkordanser for __{words}__")
-
-if samplesize < concord_dh.size:
+konkordans = "Hmm"
+if samplesize < len(concord_dh):
     if st.button(f"Klikk her for flere konkordanser. Sampler {samplesize} av {concord_dh.size}"):
         #st.write('click')
-        konk = set_markdown_link_conc(concord_dh.show(style=False, n=int(samplesize)), corpus, words)
+        konkordans = set_html_link_conc(concord_dh.sample(samplesize), corpus, words)
+        
+
 else:
     if concord_dh.size == 0:
         st.write(f"Ingen treff")
     else:
         st.write(f"Viser alle {concord_dh.size} konkordansene ")
-
-counts = concord_dh.show(n=concord_dh.size, style=False).groupby('urn').count()[['concordance']]
-counts.columns = ['freq']
-
-st.session_state['counts'] = counts
+        konkordans = set_html_link_conc(concord_dh, corpus, words)
+        
+st.markdown(konkordans.to_html(), unsafe_allow_html=True)
 
 
-st.markdown('\n\n'.join(
-    [f"{r[1][0]}  {r[1][1]}" for r in konk.iterrows()]
-).replace('<b>','**').replace('</b>', '**'))
 
 

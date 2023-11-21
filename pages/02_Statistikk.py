@@ -33,10 +33,10 @@ with col2:
 
 
 
-
-
-a = pd.concat([corpus, counts], axis = 1).reset_index()[['urn','year', 'freq']].fillna(0)
-
+st.write(corpus.sample(2))
+st.write(counts.sample(2))
+a = pd.concat([corpus.set_index('dhlabid'), counts], axis = 1).reset_index()[['urn','year', 'freq']].dropna()
+#a = a[a.year>0]
 
 st.write(f"Antallet avsnitt som gir treff på __{st.session_state['konk']}__.")
 st.dataframe(counts.sample(100, replace=True))
@@ -45,8 +45,11 @@ if vis == 'dataramme':
     st.write(groups)
 
 elif vis == 'søylediagram':
+    #st.write(a.year)
     a['bins'] = pd.cut(a.year, num, precision=0)
+    st.dataframe(a)
     groups = a.groupby('bins').sum()[['freq']]
+    st.dataframe(groups)
     groups.index = groups.index.astype(str).map(lambda x: '-'.join(x[1:-1].split(',')))
     st.bar_chart(groups)
 
