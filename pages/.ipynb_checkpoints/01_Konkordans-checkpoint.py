@@ -12,7 +12,7 @@ max_conc = 20000
 
 @st.cache_data( show_spinner = False)
 def konk(corpus = None, query = None): 
-    concord = api.concordance(list(corpus.urn), query, limit = max_conc)
+    concord = api.concordance(list(corpus.reset_index().dhlabid), query, limit = max_conc)
     #concord = dh.Concordance(corpus, query, limit = max_conc)
     return concord[['urn','conc']]
 
@@ -20,6 +20,7 @@ def konk(corpus = None, query = None):
 def set_markdown_link_conc(conc, corpus, query):
     try:
         corps = corpus.set_index('urn')
+        st.dataframe(conc.sample(5))
         conc['link'] = conc['urn'].apply(lambda c: "[{display}](https://www.nb.no/items/{x}?searchText={q})".format(x = c, display = f"{corps.loc[c].title} - {corps.loc[c].authors} : {corps.loc[c].year}" , q = urllib.parse.quote(query)))
     except:
         conc['link'] = ""
@@ -76,20 +77,20 @@ samplesize = int(
 
 
 st.markdown(f"## Konkordanser for __{words}__")
-konkordans = "Hmm"
+
 if samplesize < len(concord_dh):
+    konkordans = set_html_link_conc(concord_dh.sample(samplesize), corpus, words)
     if st.button(f"Klikk her for flere konkordanser. Sampler {samplesize} av {concord_dh.size}"):
         #st.write('click')
-        konkordans = set_html_link_conc(concord_dh.sample(samplesize), corpus, words)
-        
-
+        #konkordans = set_html_link_conc(concord_dh.sample(samplesize), corpus, words)
+        st.markdown(konkordans.to_html(escape=False), unsafe_allow_html=True)
+    
 else:
     if concord_dh.size == 0:
         st.write(f"Ingen treff")
     else:
         st.write(f"Viser alle {concord_dh.size} konkordansene ")
         konkordans = set_html_link_conc(concord_dh, corpus, words)
-        
 st.markdown(konkordans.to_html(escape=False), unsafe_allow_html=True)
 
 

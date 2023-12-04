@@ -16,6 +16,10 @@ def korpus():
     barn = pd.read_csv("barn.csv").fillna('').drop_duplicates().fillna('').set_index('dhlabid').reset_index()
     barn.year = barn.year.replace('', np.nan)
     kudos.year = kudos.year.replace('', np.nan)
+
+    #pd.to_numeric(barn.year)
+    #pd.to_numeric(kudos.year)
+
     kudos.year = kudos.year.dropna().astype(int)
     barn.year = barn.year.dropna().astype(int)
     
@@ -23,14 +27,15 @@ def korpus():
 
 kudos, barn = korpus()
 
+
 splits = [1945, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020, 2030]
 groups = [splits[a:a+2] for a in range(len(splits)-1)]
 make_splits = lambda df: {f"{str(x[0])}-{str(x[1])}": df.loc[barn.year >= x[0]].loc[df.year < x[1]] for x in groups}
-
+    
 barn_år = make_splits(barn)
 kudos_år = make_splits(kudos)
 
-corpus_col, year_col, _ = st.columns([2,4,5])
+corpus_col, title_col, year_col, _ = st.columns([2,3,4,5])
 
 with corpus_col:
     corpus_name = st.selectbox("Velg korpus", ['kudos', 'barn'])
@@ -39,11 +44,20 @@ with corpus_col:
     elif corpus_name == 'barn':
         korpus = barn_år
 
+with title_col:
+    
+    corpus_title = st.text_input("Ord i tittel:",'', help="La stå blank for ikke å begrense")
+    #if corpus_title != '' and corpus_title != ' ':
+    #    korpus = korpus[]
+
 with year_col:
     period = st.multiselect("Velg periode:", korpus.keys(),default = list(korpus.keys())[1])
 
-st.session_state['korpus'] = pd.concat([korpus[k] for k in period])
-
+if corpus_title != '' and corpus_title != ' ':
+    st.session_state['korpus'] = pd.concat([korpus[k][korpus[k].title.str.contains(corpus_title)] for k in period])["urn authors title year city publisher langs subjects".split() ].set_index('urn')
+else:
+    st.session_state['korpus'] = pd.concat([korpus[k] for k in period])["dhlabid urn authors title year city publisher langs subjects".split() ].set_index('dhlabid')
+    
 kdict = {k:len(korpus[k]) for k in korpus.keys() }
 
 st.write(f'korpuset inneholder {kdict}')
