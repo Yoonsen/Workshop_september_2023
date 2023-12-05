@@ -1,10 +1,34 @@
 import streamlit as st
 #import dhlab.text as dh
 import dhlab_api as api
+import dhlab as dh
 import pandas as pd
 from PIL import Image
 import urllib
+import requests
 
+def concordance(
+        urns = None, words = None, window = 25, limit = 100
+):
+    """Get a list of concordances from the National Library's database.
+
+    Call the API :py:obj:`~dhlab.constants.BASE_URL` endpoint
+    `/conc <https://api.nb.no/dhlab/#/default/post_conc>`_.
+
+    :param list urns: uniform resource names, for example:
+        ``["URN:NBN:no-nb_digibok_2008051404065", "URN:NBN:no-nb_digibok_2010092120011"]``
+    :param str words: Word(s) to search for.
+        Can be an SQLite fulltext query, an fts5 string search expression.
+    :param int window: number of tokens on either side to show in the collocations, between 1-25.
+    :param int limit: max. number of concordances per document. Maximum value is 1000.
+    :return: a table of concordances
+    """
+    if words is None:
+        return {}  # exit condition
+    else:
+        params = {"dhlabids": urns, "query": words, "window": window, "limit": limit}
+        r = requests.post(dh.constants.BASE_URL + "/conc", json=params)
+    return pd.DataFrame(r.json())
 
 st.session_state.update(st.session_state)
 
@@ -12,9 +36,10 @@ max_conc = 20000
 
 @st.cache_data( show_spinner = False)
 def konk(corpus = None, query = None): 
-    concord = api.concordance(list(corpus.reset_index().dhlabid), query, limit = max_conc)
+    #st.write(list(corpus.index)[:20])
+    concord = concordance(list(corpus.dhlabid), query, limit = max_conc)
     #concord = dh.Concordance(corpus, query, limit = max_conc)
-    return concord[['urn','conc']]
+    return concord #[['urn','conc']]
 
 
 def set_markdown_link_conc(conc, corpus, query):
@@ -82,12 +107,13 @@ if samplesize < len(concord_dh):
     konkordans = set_html_link_conc(concord_dh.sample(samplesize), corpus, words)
     if st.button(f"Klikk her for flere konkordanser. Sampler {samplesize} av {concord_dh.size}"):
         #st.write('click')
-        #konkordans = set_html_link_conc(concord_dh.sample(samplesize), corpus, words)
-        st.markdown(konkordans.to_html(escape=False), unsafe_allow_html=True)
+        konkordans = set_html_link_conc(concord_dh.sample(samplesize), corpus, words)
+        #st.markdown(konkordans.to_html(escape=False), unsafe_allow_html=True)
     
 else:
     if concord_dh.size == 0:
         st.write(f"Ingen treff")
+        konkordans = pd.DataFrame()
     else:
         st.write(f"Viser alle {concord_dh.size} konkordansene ")
         konkordans = set_html_link_conc(concord_dh, corpus, words)
