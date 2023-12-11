@@ -59,11 +59,16 @@ if 'periods' not in st.session_state:
 #st.write(st.session_state.periods, korpus.keys())
 with year_col:
     period = st.multiselect("Velg periode:", korpus.keys(), default = st.session_state.periods, key='periods')
-    
-if corpus_title != '' and corpus_title != ' ':
-    st.session_state['korpus'] = pd.concat([korpus[k][korpus[k].title.str.contains(corpus_title)] for k in period])["urn authors title year city publisher langs subjects".split() ]
+
+if st.session_state.periods != []:
+    if corpus_title != '' and corpus_title != ' ':
+        st.session_state['korpus'] = pd.concat([
+            korpus[k][korpus[k].title.str.contains(corpus_title)] 
+            for k in period])["urn authors title year city publisher langs subjects".split() ]
+    else:
+        st.session_state['korpus'] = pd.concat([korpus[k] for k in period])["dhlabid urn authors title year city publisher langs subjects".split() ]
 else:
-    st.session_state['korpus'] = pd.concat([korpus[k] for k in period])["dhlabid urn authors title year city publisher langs subjects".split() ]
+    st.session_state['korpus'] = pd.concat([korpus[k] for k in korpus])["dhlabid urn authors title year city publisher langs subjects".split() ]
     
 kdict = {k:len(korpus[k]) for k in korpus.keys() }
 
