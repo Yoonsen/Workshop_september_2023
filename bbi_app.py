@@ -28,8 +28,6 @@ def korpus():
 
 kudos, barn = korpus()
 
-st.write(len(barn), len(kudos))
-
 splits = [1945, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020, 2030]
 groups = [splits[a:a+2] for a in range(len(splits)-1)]
 make_splits = lambda df: {f"{str(x[0])}-{str(x[1])}": df.loc[barn.year >= x[0]].loc[df.year < x[1]] for x in groups}
