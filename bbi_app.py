@@ -28,6 +28,7 @@ def korpus():
 
 kudos, barn = korpus()
 
+st.write(len(barn), len(kudos))
 
 splits = [1945, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020, 2030]
 groups = [splits[a:a+2] for a in range(len(splits)-1)]
@@ -36,7 +37,7 @@ make_splits = lambda df: {f"{str(x[0])}-{str(x[1])}": df.loc[barn.year >= x[0]].
 barn_år = make_splits(barn)
 kudos_år = make_splits(kudos)
 
-corpus_col, title_col, year_col, _ = st.columns([2,3,4,5])
+corpus_col, year_col, _ = st.columns([2,5,3])
 if "corpus_name" not in st.session_state:
     st.session_state.corpus_name = 'barn'
 
@@ -48,27 +49,62 @@ with corpus_col:
     elif corpus_name == 'barn':
         korpus = barn_år
 
-with title_col:
-    
-    corpus_title = st.text_input("Ord i tittel:",'', help="La stå blank for ikke å begrense")
-    #if corpus_title != '' and corpus_title != ' ':
-    #    korpus = korpus[]
+
 if 'periods' not in st.session_state:
     st.session_state.periods = list(korpus.keys())[:2]
-
-#st.write(st.session_state.periods, korpus.keys())
+    
 with year_col:
     period = st.multiselect("Velg periode:", korpus.keys(), default = st.session_state.periods, key='periods')
 
+
+title_col, author_col, subject_col, literary_col = st.columns([3,2,3,2])
+if "title_str" not in st.session_state:
+    st.session_state.title_str = ''   
+with title_col:
+    corpus_title = st.text_input("Ord i tittel:",st.session_state.title_str, help="La stå blank for ikke å begrense", key='title_str')
+
+if "author_str" not in st.session_state:
+    st.session_state.author_str = ''   
+with author_col:
+    corpus_author = st.text_input("Forfatter:",st.session_state.author_str, help="La stå blank for ikke å begrense", key='author_str')
+
+if "subject_str" not in st.session_state:
+    st.session_state.subject_str = ''   
+with subject_col:
+    corpus_subject = st.text_input("Subject:",st.session_state.subject_str, help="La stå blank for ikke å begrense", key='subject_str')
+
+if "literary_str" not in st.session_state:
+    st.session_state.literary_str = ''   
+with literary_col:
+    corpus_literary = st.text_input("Litterær form:",st.session_state.literary_str, help="La stå blank for ikke å begrense", key='literary_str')
+
+cols = "dhlabid authors title year subjects literaryform city publisher langs urn".split()
+
 if st.session_state.periods != []:
-    if corpus_title != '' and corpus_title != ' ':
-        st.session_state['korpus'] = pd.concat([
-            korpus[k][korpus[k].title.str.contains(corpus_title)] 
-            for k in period])["urn authors title year city publisher langs subjects".split() ]
-    else:
-        st.session_state['korpus'] = pd.concat([korpus[k] for k in period])["dhlabid urn authors title year city publisher langs subjects".split() ]
+    st.session_state['korpus'] = pd.concat([korpus[k] for k in period])[cols]
 else:
-    st.session_state['korpus'] = pd.concat([korpus[k] for k in korpus])["dhlabid urn authors title year city publisher langs subjects".split() ]
+    st.session_state['korpus'] = pd.concat([korpus[k] for k in korpus])[cols]
+str_map = {
+    'literary_str':'literaryform',
+    'subject_str': 'subjects',
+    'author_str': 'authors',
+    'title_str':'title'
+}
+if st.session_state.periods != []:                                    
+    for reduction in ['literary_str','subject_str', 'author_str', 'title_str']:
+        if st.session_state[reduction].strip() != '':
+            df2 = pd.concat([
+                korpus[k][korpus[k][str_map[reduction]].str.contains(st.session_state[reduction])] 
+                for k in period])[cols]
+            st.session_state['korpus'] = st.session_state['korpus'].merge(df2, how = 'inner')
+else:
+    for reduction in ['literary_str','subject_str', 'author_str', 'title_str']:
+        if st.session_state[reduction].strip() != '':
+            df2 = pd.concat([
+                korpus[k][korpus[k][str_map[reduction]].str.contains(st.session_state[reduction])] 
+                for k in korpus])[cols]
+            st.session_state['korpus'] = st.session_state['korpus'].merge(df2, how = 'inner')
+
     
 kdict = {k:len(korpus[k]) for k in korpus.keys() }
 
