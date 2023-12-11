@@ -31,7 +31,6 @@ def concordance(
     return pd.DataFrame(r.json())
 
 st.session_state.update(st.session_state)
-
 max_conc = 20000
 
 @st.cache_data( show_spinner = False)
@@ -69,10 +68,11 @@ corpus = st.session_state['korpus']
 
 
 
-st.title(f'Søk etter uttrykk i korpuset')
+st.title(f'Søk etter uttrykk i korpuset "{st.session_state.corpus_name}"')
+
 
 if not 'konk' in st.session_state:
-    st.session_state['konk'] = '"religiøst mangfold"'
+    st.session_state['konk'] = ''
 
 words = st.text_input(
     'Søk etter ord og fraser', 

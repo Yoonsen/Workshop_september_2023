@@ -8,6 +8,7 @@ import os
 import re
 import matplotlib.pyplot as plt
 
+st.session_state.update(st.session_state)
 max_conc = 20000
 
 

@@ -5,6 +5,7 @@ from io import BytesIO
 import re
 import numpy as np
 
+st.session_state.update(st.session_state)
 st.set_page_config(page_title="Mangfold i barnebokslitteraturen", page_icon=None, layout="wide", initial_sidebar_state="auto", menu_items=None)
 
 st.title("Mangfold og barnebøker")
@@ -36,9 +37,12 @@ barn_år = make_splits(barn)
 kudos_år = make_splits(kudos)
 
 corpus_col, title_col, year_col, _ = st.columns([2,3,4,5])
+if "corpus_name" not in st.session_state:
+    st.session_state.corpus_name = 'barn'
 
+choices = ['kudos', 'barn']
 with corpus_col:
-    corpus_name = st.selectbox("Velg korpus", ['kudos', 'barn'])
+    corpus_name = st.selectbox("Velg korpus", choices, index=choices.index(st.session_state.corpus_name), key='corpus_name')
     if corpus_name == 'kudos':
         korpus = kudos_år
     elif corpus_name == 'barn':
@@ -49,10 +53,13 @@ with title_col:
     corpus_title = st.text_input("Ord i tittel:",'', help="La stå blank for ikke å begrense")
     #if corpus_title != '' and corpus_title != ' ':
     #    korpus = korpus[]
+if 'periods' not in st.session_state:
+    st.session_state.periods = list(korpus.keys())[:2]
 
+#st.write(st.session_state.periods, korpus.keys())
 with year_col:
-    period = st.multiselect("Velg periode:", korpus.keys(),default = list(korpus.keys())[1])
-
+    period = st.multiselect("Velg periode:", korpus.keys(), default = st.session_state.periods, key='periods')
+    
 if corpus_title != '' and corpus_title != ' ':
     st.session_state['korpus'] = pd.concat([korpus[k][korpus[k].title.str.contains(corpus_title)] for k in period])["urn authors title year city publisher langs subjects".split() ]
 else:
@@ -60,7 +67,7 @@ else:
     
 kdict = {k:len(korpus[k]) for k in korpus.keys() }
 
-st.write(f'korpuset inneholder {kdict}')
+#st.write(f'korpuset inneholder {kdict}')
 st.write(f"## Et lite utvalg fra korpuset bygd over {' '.join(period)} med {len(st.session_state['korpus'])} dokumenter")
 
 st.dataframe(st.session_state['korpus'].sample(min(100, len(st.session_state['korpus']))))
