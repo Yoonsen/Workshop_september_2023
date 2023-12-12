@@ -92,14 +92,14 @@ if st.session_state.periods != []:
     for reduction in ['literary_str','subject_str', 'author_str', 'title_str']:
         if st.session_state[reduction].strip() != '':
             df2 = pd.concat([
-                korpus[k][korpus[k][str_map[reduction]].str.contains(st.session_state[reduction])] 
+                korpus[k][korpus[k][str_map[reduction]].str.contains(st.session_state[reduction], flags=re.IGNORECASE, regex=True)] 
                 for k in period])[cols]
             st.session_state['korpus'] = st.session_state['korpus'].merge(df2, how = 'inner')
 else:
     for reduction in ['literary_str','subject_str', 'author_str', 'title_str']:
         if st.session_state[reduction].strip() != '':
             df2 = pd.concat([
-                korpus[k][korpus[k][str_map[reduction]].str.contains(st.session_state[reduction])] 
+                korpus[k][korpus[k][str_map[reduction]].str.contains(st.session_state[reduction], flags=re.IGNORECASE, regex=True)] 
                 for k in korpus])[cols]
             st.session_state['korpus'] = st.session_state['korpus'].merge(df2, how = 'inner')
 
