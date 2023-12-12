@@ -75,6 +75,7 @@ corpus = st.session_state['korpus']
 st.title(f'Søk etter uttrykk i korpuset "{st.session_state.corpus_name}"')
 
 
+    
 if not 'konk' in st.session_state:
     st.session_state['konk'] = 'mangfold'
 
@@ -106,6 +107,8 @@ samplesize = int(
 
 
 st.markdown(f"## Konkordanser for __{words}__")
+
+st.session_state['counts'] = len(concord_dh)
 
 if samplesize < len(concord_dh):
     konkordans = set_html_link_conc(concord_dh.sample(samplesize), corpus, words)

@@ -47,6 +47,8 @@ with corpus_col:
     elif corpus_name == 'barn':
         korpus = barn_år
 
+if "counts" not in st.session_state:
+    st.session_state["counts"] = 0
 
 if 'periods' not in st.session_state:
     st.session_state.periods = list(korpus.keys())[:2]
