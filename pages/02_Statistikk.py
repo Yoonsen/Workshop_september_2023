@@ -26,7 +26,7 @@ if "rolling" not in st.session_state:
     st.session_state.rolling = 5
 
 if "type" not in st.session_state:
-    st.session_state.type = "linjediagram"
+    st.session_state.type = "søylediagram"
 
 if "bins" not in st.session_state:
     st.session_state.bins = 10
