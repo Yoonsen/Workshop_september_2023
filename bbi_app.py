@@ -57,26 +57,32 @@ with year_col:
     period = st.multiselect("Velg periode:", korpus.keys(), default = st.session_state.periods, key='periods')
 
 
-title_col, author_col, subject_col, literary_col = st.columns([3,2,3,2])
-if "title_str" not in st.session_state:
-    st.session_state.title_str = ''   
+title_col, author_col, subject_col, literary_col, null_col = st.columns([2,2,2,2,1])
+
+for key in ["title_str", "author_str", "subject_str", "literary_str"]:
+    if key not in st.session_state:
+        st.session_state[key] = ''
+
+with null_col:
+    st.markdown("<br>", unsafe_allow_html=True) 
+    if st.button('Nullstill', help="Klikk for å slette søketermene"):
+        for k in ["title_str", "author_str", "subject_str", "literary_str"]:
+            st.session_state[k] =  ''
+  
 with title_col:
     corpus_title = st.text_input("Ord i tittel:",st.session_state.title_str, help="La stå blank for ikke å begrense", key='title_str')
 
-if "author_str" not in st.session_state:
-    st.session_state.author_str = ''   
 with author_col:
     corpus_author = st.text_input("Forfatter:",st.session_state.author_str, help="La stå blank for ikke å begrense", key='author_str')
 
-if "subject_str" not in st.session_state:
-    st.session_state.subject_str = ''   
 with subject_col:
     corpus_subject = st.text_input("Subject:",st.session_state.subject_str, help="La stå blank for ikke å begrense", key='subject_str')
 
-if "literary_str" not in st.session_state:
-    st.session_state.literary_str = ''   
 with literary_col:
     corpus_literary = st.text_input("Litterær form:",st.session_state.literary_str, help="La stå blank for ikke å begrense", key='literary_str')
+
+
+
 
 cols = "dhlabid authors title year subjects literaryform city publisher langs urn".split()
 
