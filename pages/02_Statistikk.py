@@ -7,6 +7,7 @@ import urllib
 import os
 import re
 import matplotlib.pyplot as plt
+import altair as alt
 
 @st.cache_data()
 def counting(corpus, search_expr):
@@ -87,14 +88,48 @@ a = pd.concat([corpus.set_index('dhlabid')["title authors year".split()], ct], a
 
 if vis == 'dataramme':
     a['bins'] = pd.cut(a.year, num, precision=0)
-    groups = a.groupby('bins').sum()[ct.columns]
+    groups = a.groupby('bins', observed = True).sum()[ct.columns]
     st.write(groups)
 
 elif vis == 'søylediagram':
     a['bins'] = pd.cut(a.year, num, precision=0)
-    groups = a.groupby('bins').sum()[ct.columns]
-    groups.index = groups.index.astype(str).map(lambda x: '-'.join(x[1:-1].split(',')))
-    st.bar_chart(groups)
+    groups = a.groupby('bins', observed = True).sum().reset_index()
+    columns_to_select = ['bins'] + [col for col in ct.columns if col in groups.columns]
+    groups = groups[columns_to_select]
+
+    # Now you can safely access 'bins' column
+    #groups['bins'] = groups['bins'].astype(str).map(lambda x: '-'.join(x[1:-1].split(',')))
+    groups['bins'] = groups['bins'].astype(str).map(
+        lambda x: '-'.join([str(int(float(edge))) for edge in x[1:-1].split(',')])
+    )
+    #groups['bins'] = groups['bins'].astype(str).map(lambda x: '-'.join(x[1:-1].split(',')))
+
+    #groups.index = groups.index.astype(str).map(lambda x: '-'.join(x[1:-1].split(',')))
+    #st.bar_chart(groups)
+
+    # Creating a bar chart using Matplotlib
+    #fig, ax = plt.subplots()
+    #groups.plot(kind='bar', stacked=True, ax=ax)
+
+    # Rotating x-axis labels
+    #plt.xticks(rotation='horizontal')
+
+    # Displaying the chart in Streamlit
+    #st.pyplot(fig)
+
+    melted = groups.melt('bins', var_name='category', value_name='value')
+
+    # Create a stacked bar chart
+    chart = alt.Chart(melted).mark_bar().encode(
+        x=alt.X('bins:O', axis=alt.Axis(labelAngle=-20)),  # O for ordinal
+        y='value:Q',  # Q for quantitative
+        color='category:N',  # N for nominal
+        order=alt.Order('category', sort='ascending')  # Sort the stack order
+    ).properties(
+        width=600,
+        height=400
+    )
+    st.altair_chart(chart, use_container_width=True)
 
 elif vis == 'linjediagram':
     lines = a
