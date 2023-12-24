@@ -87,11 +87,11 @@ with literary_col:
 cols = "dhlabid authors title year subjects literaryform city publisher langs urn".split()
 
 if st.session_state.periods != []:
-    st.session_state['korpus'] = pd.concat([korpus[k] for k in period]) #[cols]
+    st.session_state['korpus'] = pd.concat([korpus[k] for k in period])[cols]
 else:
-    st.session_state['korpus'] = pd.concat([korpus[k] for k in korpus]) #[cols]
+    st.session_state['korpus'] = pd.concat([korpus[k] for k in korpus])[cols]
 
-st.write(st.session_state.corpus_name, len(st.session_state.korpus), st.session_state.periods)
+#st.write(st.session_state.corpus_name, len(st.session_state.korpus), st.session_state.periods)
          
 str_map = {
     'literary_str':'literaryform',
@@ -99,6 +99,7 @@ str_map = {
     'author_str': 'authors',
     'title_str':'title'
 }
+
 if st.session_state.periods != []:                                    
     for reduction in ['literary_str','subject_str', 'author_str', 'title_str']:
         if st.session_state[reduction].strip() != '':
