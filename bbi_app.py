@@ -90,7 +90,8 @@ if st.session_state.periods != []:
     st.session_state['korpus'] = pd.concat([korpus[k] for k in period]) #[cols]
 else:
     st.session_state['korpus'] = pd.concat([korpus[k] for k in korpus]) #[cols]
-st.write(len(corpus_name, st.session_state.korpus)
+st.write(corpus_name, len(st.session_state.korpus))
+         
 str_map = {
     'literary_str':'literaryform',
     'subject_str': 'subjects',
