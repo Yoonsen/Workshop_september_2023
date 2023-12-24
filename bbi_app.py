@@ -27,7 +27,7 @@ def korpus():
     return kudos.dropna(), barn.dropna()
 
 kudos, barn = korpus()
-st.write(len(kudos), len(barn))
+#st.write(len(kudos), len(barn))
 splits = [1945, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020, 2030]
 groups = [splits[a:a+2] for a in range(len(splits)-1)]
 make_splits = lambda df: {f"{str(x[0])}-{str(x[1])}": df.loc[barn.year >= x[0]].loc[df.year < x[1]] for x in groups}
@@ -99,6 +99,7 @@ str_map = {
 if st.session_state.periods != []:                                    
     for reduction in ['literary_str','subject_str', 'author_str', 'title_str']:
         if st.session_state[reduction].strip() != '':
+            st.write(reduction,'sub')
             df2 = pd.concat([
                 korpus[k][korpus[k][str_map[reduction]].str.contains(st.session_state[reduction], flags=re.IGNORECASE, regex=True)] 
                 for k in period])[cols]
@@ -106,6 +107,7 @@ if st.session_state.periods != []:
 else:
     for reduction in ['literary_str','subject_str', 'author_str', 'title_str']:
         if st.session_state[reduction].strip() != '':
+            st.write(reduction,'all')
             df2 = pd.concat([
                 korpus[k][korpus[k][str_map[reduction]].str.contains(st.session_state[reduction], flags=re.IGNORECASE, regex=True)] 
                 for k in korpus])[cols]
