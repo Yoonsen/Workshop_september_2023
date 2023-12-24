@@ -30,7 +30,7 @@ kudos, barn = korpus()
 #st.write(len(kudos), len(barn))
 splits = [1945, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020, 2030]
 groups = [splits[a:a+2] for a in range(len(splits)-1)]
-make_splits = lambda df: {f"{str(x[0])}-{str(x[1])}": df.loc[barn.year >= x[0]].loc[df.year < x[1]] for x in groups}
+make_splits = lambda df: {f"{str(x[0])}-{str(x[1])}": df.loc[df.year >= x[0]].loc[df.year < x[1]] for x in groups}
     
 barn_år = make_splits(barn)
 kudos_år = make_splits(kudos)
@@ -90,7 +90,8 @@ if st.session_state.periods != []:
     st.session_state['korpus'] = pd.concat([korpus[k] for k in period]) #[cols]
 else:
     st.session_state['korpus'] = pd.concat([korpus[k] for k in korpus]) #[cols]
-st.write(corpus_name, len(st.session_state.korpus))
+
+st.write(st.session_state.corpus_name, len(st.session_state.korpus), st.session_state.periods)
          
 str_map = {
     'literary_str':'literaryform',
