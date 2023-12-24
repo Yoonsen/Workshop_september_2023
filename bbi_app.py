@@ -51,7 +51,7 @@ if "counts" not in st.session_state:
     st.session_state["counts"] = 0
 
 if 'periods' not in st.session_state:
-    st.session_state.periods = list(korpus.keys())[:2]
+    st.session_state.periods = list(korpus.keys())[:-2]
     
 with year_col:
     period = st.multiselect("Velg periode:", korpus.keys(), default = st.session_state.periods, key='periods')
