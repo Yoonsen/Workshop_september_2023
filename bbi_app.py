@@ -57,30 +57,32 @@ with year_col:
     period = st.multiselect("Velg periode:", korpus.keys(), default = st.session_state.periods, key='periods')
 
 
-title_col, author_col, subject_col, literary_col, null_col = st.columns([2,2,2,2,1])
+title_col, author_col, publisher_col, subject_col, literary_col, null_col = st.columns([2,2,2,2,2,1])
 
-for key in ["title_str", "author_str", "subject_str", "literary_str"]:
+for key in ["title_str", "author_str", "subject_str", "literary_str", "publisher_str"]:
     if key not in st.session_state:
         st.session_state[key] = ''
 
 with null_col:
     st.markdown("<br>", unsafe_allow_html=True) 
     if st.button('Nullstill', help="Klikk for å slette søketermene"):
-        for k in ["title_str", "author_str", "subject_str", "literary_str"]:
+        for k in ["title_str", "author_str", "subject_str", "literary_str", "publisher_str"]:
             st.session_state[k] =  ''
   
 with title_col:
-    corpus_title = st.text_input("Ord i tittel:",st.session_state.title_str, help="La stå blank for ikke å begrense", key='title_str')
+    corpus_title = st.text_input("Ord i tittel:",st.session_state.title_str, help="Skriv inn del av tittel", key='title_str')
 
 with author_col:
-    corpus_author = st.text_input("Forfatter:",st.session_state.author_str, help="La stå blank for ikke å begrense", key='author_str')
+    corpus_author = st.text_input("Forfatter:",st.session_state.author_str, help="Angi forfatter, eller del av forfatternavn", key='author_str')
 
 with subject_col:
-    corpus_subject = st.text_input("Subject:",st.session_state.subject_str, help="La stå blank for ikke å begrense", key='subject_str')
+    corpus_subject = st.text_input("Subject:",st.session_state.subject_str, help="angi del av temaord", key='subject_str')
 
 with literary_col:
-    corpus_literary = st.text_input("Litterær form:",st.session_state.literary_str, help="La stå blank for ikke å begrense", key='literary_str')
+    corpus_literary = st.text_input("Type dokument:",st.session_state.literary_str, help="Litterær form/sjanger eller dokument-type", key='literary_str')
 
+with publisher_col:
+    corpus_literary = st.text_input("Forlag (publisher-kolonne):",st.session_state.literary_str, help="Legg inn forlag eller departement", key='publisher_str')
 
 
 
@@ -97,7 +99,8 @@ str_map = {
     'literary_str':'literaryform',
     'subject_str': 'subjects',
     'author_str': 'authors',
-    'title_str':'title'
+    'title_str':'title',
+    'publisher_str':'publisher'
 }
 
 if st.session_state.periods != []:                                    
