@@ -20,9 +20,9 @@ def korpus():
 
     #pd.to_numeric(barn.year)
     #pd.to_numeric(kudos.year)
-    kudos.year = pd.to_datetime(kudos.year.astype(str))
-    #kudos.year = kudos.year.dropna().astype(int)
-    barn.year = pd.to_datetime(barn.year.astype(str))
+
+    kudos.year = kudos.year.dropna().astype(int)
+    barn.year = barn.year.dropna().astype(int)
     
     return kudos.dropna(), barn.dropna()
 
@@ -126,4 +126,4 @@ kdict = {k:len(korpus[k]) for k in korpus.keys() }
 #st.write(f'korpuset inneholder {kdict}')
 st.write(f"##  Utvalg på oppunder 100 rader fra korpuset med {' '.join(period)} med {len(st.session_state['korpus'])} dokumenter")
 
-st.dataframe(st.session_state['korpus'].sample(min(100, len(st.session_state['korpus'])))[["authors","publisher","title","year","literaryform","subjects"]], hide_index=True)
+st.dataframe(st.session_state['korpus'].sample(min(100, len(st.session_state['korpus'])))[["authors","publisher","title","year","literaryform","subjects"]])
