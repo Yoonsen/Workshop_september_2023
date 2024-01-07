@@ -20,9 +20,9 @@ def korpus():
 
     #pd.to_numeric(barn.year)
     #pd.to_numeric(kudos.year)
-
-    kudos.year = kudos.year.dropna().astype(int)
-    barn.year = barn.year.dropna().astype(int)
+    kudos.year = pd.to_datetime(kudos.year.dropna())
+    #kudos.year = kudos.year.dropna().astype(int)
+    barn.year = pd.to_datetime(barn.year.dropna())
     
     return kudos.dropna(), barn.dropna()
 
