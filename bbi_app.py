@@ -70,19 +70,19 @@ with null_col:
             st.session_state[k] =  ''
   
 with title_col:
-    corpus_title = st.text_input("Ord i tittel:",st.session_state.title_str, help="Skriv inn del av tittel", key='title_str')
+    corpus_title = st.text_input("Ord i tittel:",st.session_state.title_str, help="Skriv inn del av tittel, negasjon med ^(?!t) der t er uttrykk i tittelen", key='title_str')
 
 with author_col:
-    corpus_author = st.text_input("Forfatter:",st.session_state.author_str, help="Angi forfatter, eller del av forfatternavn", key='author_str')
+    corpus_author = st.text_input("Forfatter:",st.session_state.author_str, help="Angi forfatter, eller del av forfatternavn, negasjon med ^(?!f) der f er forfatternavn", key='author_str')
 
 with subject_col:
-    corpus_subject = st.text_input("Subject:",st.session_state.subject_str, help="angi del av temaord", key='subject_str')
+    corpus_subject = st.text_input("Subject:",st.session_state.subject_str, help="angi del av temaord, negasjon ^(?!subj) der subj er et temaord", key='subject_str')
 
 with literary_col:
-    corpus_literary = st.text_input("Type dokument:",st.session_state.literary_str, help="Litterær form/sjanger eller dokument-type", key='literary_str')
+    corpus_literary = st.text_input("Type dokument:",st.session_state.literary_str, help="Litterær form/sjanger eller dokument-type, ^(?!skj) der skj er det som skal utelates", key='literary_str')
 
 with publisher_col:
-    corpus_literary = st.text_input("Forlag (publisher-kolonne):",st.session_state.literary_str, help="Legg inn forlag eller departement", key='publisher_str')
+    corpus_literary = st.text_input("Forlag (publisher-kolonne):",st.session_state.literary_str, help="Legg inn forlag eller departement, for negasjon skriv ^(?!dep) er det departementet som skal utelates", key='publisher_str')
 
 
 
