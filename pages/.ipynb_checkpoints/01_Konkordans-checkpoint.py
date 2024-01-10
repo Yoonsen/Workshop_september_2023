@@ -28,10 +28,13 @@ def concordance(
     else:
         params = {"dhlabids": urns, "query": words, "window": window, "limit": limit}
         r = requests.post(dh.constants.BASE_URL + "/conc", json=params)
-    return pd.DataFrame(r.json())
+        if r.status_code == 200:
+            res = r.json()
+        else:
+            res = []
+    return pd.DataFrame(res)
 
 st.session_state.update(st.session_state)
-
 max_conc = 20000
 
 @st.cache_data( show_spinner = False)
@@ -69,10 +72,12 @@ corpus = st.session_state['korpus']
 
 
 
-st.title(f'Søk etter uttrykk i korpuset')
+st.title(f'Søk etter uttrykk i korpuset "{st.session_state.corpus_name}"')
 
+
+    
 if not 'konk' in st.session_state:
-    st.session_state['konk'] = '"religiøst mangfold"'
+    st.session_state['konk'] = 'mangfold'
 
 words = st.text_input(
     'Søk etter ord og fraser', 
@@ -103,7 +108,9 @@ samplesize = int(
 
 st.markdown(f"## Konkordanser for __{words}__")
 
-if samplesize < len(concord_dh):
+st.session_state['counts'] = len(concord_dh)
+
+if samplesize > len(concord_dh):
     konkordans = set_html_link_conc(concord_dh.sample(samplesize), corpus, words)
     if st.button(f"Klikk her for flere konkordanser. Sampler {samplesize} av {concord_dh.size}"):
         #st.write('click')
@@ -117,6 +124,7 @@ else:
     else:
         st.write(f"Viser alle {concord_dh.size} konkordansene ")
         konkordans = set_html_link_conc(concord_dh, corpus, words)
+
 st.markdown(konkordans.to_html(escape=False), unsafe_allow_html=True)
 
 

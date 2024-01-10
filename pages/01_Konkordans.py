@@ -110,7 +110,7 @@ st.markdown(f"## Konkordanser for __{words}__")
 
 st.session_state['counts'] = len(concord_dh)
 
-if samplesize < len(concord_dh):
+if samplesize > len(concord_dh):
     konkordans = set_html_link_conc(concord_dh.sample(samplesize), corpus, words)
     if st.button(f"Klikk her for flere konkordanser. Sampler {samplesize} av {concord_dh.size}"):
         #st.write('click')
@@ -124,6 +124,7 @@ else:
     else:
         st.write(f"Viser alle {concord_dh.size} konkordansene ")
         konkordans = set_html_link_conc(concord_dh, corpus, words)
+
 st.markdown(konkordans.to_html(escape=False), unsafe_allow_html=True)
 
 
