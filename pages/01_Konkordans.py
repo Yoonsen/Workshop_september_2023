@@ -26,6 +26,7 @@ def concordance(
     if words is None:
         return {}  # exit condition
     else:
+        #st.write("antall urner:", len(urns))
         params = {"dhlabids": urns, "query": words, "window": window, "limit": limit}
         r = requests.post(dh.constants.BASE_URL + "/conc", json=params)
         if r.status_code == 200:
@@ -72,28 +73,28 @@ corpus = st.session_state['korpus']
 
 
 
-st.title(f'Søk etter uttrykk i korpuset "{st.session_state.corpus_name}"')
-
+st.title(f'Søk etter uttrykk i korpuset "{st.session_state.corpus_name}" med {len(st.session_state.korpus)} dokumenter')
 
     
-if not 'konk' in st.session_state:
-    st.session_state['konk'] = 'mangfold'
+#if not 'konk' in st.session_state:
+#    st.session_state['konk'] = 'mangfold'
 
 words = st.text_input(
     'Søk etter ord og fraser', 
-    st.session_state['konk'],
+    st.session_state.get('konk',''),
     key='konk',
     help="Bruk anførselstegn for å gruppere fraser. Trunker med * etter ord. Kombiner med OR eller AND. For ord nær hverandre bruk NEAR(ord1 ord2, Antall ord i mellom)")
 
-concord_dh = konk(corpus = corpus, query = words) 
-st.write('antall konk', len(concord_dh))
+concord_dh = konk(corpus = st.session_state.korpus, query = words) 
+#st.write('antall konk', len(concord_dh))
 
 samplesize = int(
     st.number_input(
         "Vis et visst antall konkordanser i gangen:", 
         min_value = 5,
-        value = 100, 
-        help = "Minste verdi er 5, default er 100"
+        value = st.session_state.get('antall_konk', 100), 
+        help = "Minste verdi er 5, default er 100",
+        key = 'antall_konk'
     )
 )
 
@@ -126,7 +127,7 @@ else:
         st.write(f"Viser alle {len(concord_dh)} konkordansene ")
         konkordans = set_html_link_conc(concord_dh, corpus, words)
 
-st.markdown(konkordans.to_html(escape=False), unsafe_allow_html=True)
+st.markdown(konkordans.to_html(escape=False, index=False), unsafe_allow_html=True)
 
 
 

@@ -33,7 +33,7 @@ if "bins" not in st.session_state:
     st.session_state.bins = 10
 
 if "freq_words" not in st.session_state:
-    st.session_state.freq_words = 'mangfold, lek, gutter'
+    st.session_state.freq_words = ''
     
 select_options = [ 'linjediagram', 'søylediagram','dataramme']
 
@@ -73,72 +73,68 @@ with col3:
     )                   
     search_expr = [w.strip() for w in words.split(',')]
 
-counts = counting(corpus, search_expr)
-#st.write(corpus.sample(5))
-ct = counts.transpose()
-#st.write(ct.sample(5))
-
-a = pd.concat([corpus.set_index('dhlabid')["title authors year".split()], ct], axis = 1).reset_index()
-
-#[['urn','year', 'freq']].dropna()
-#a = a[a.year>0]
-
-#st.write(f"Antallet avsnitt som gir treff på __{st.session_state['konk']}__.")
-#st.dataframe(counts.sample(100, replace=True))
-
-if vis == 'dataramme':
-    a['bins'] = pd.cut(a.year, num, precision=0)
-    groups = a.groupby('bins', observed = True).sum()[ct.columns]
-    st.write(groups)
-
-elif vis == 'søylediagram':
-    a['bins'] = pd.cut(a.year, num, precision=0)
-    groups = a.groupby('bins', observed = True).sum().reset_index()
-    columns_to_select = ['bins'] + [col for col in ct.columns if col in groups.columns]
-    groups = groups[columns_to_select]
-
-    # Now you can safely access 'bins' column
-    #groups['bins'] = groups['bins'].astype(str).map(lambda x: '-'.join(x[1:-1].split(',')))
-    groups['bins'] = groups['bins'].astype(str).map(
-        lambda x: '-'.join([str(int(float(edge))) for edge in x[1:-1].split(',')])
-    )
-    #groups['bins'] = groups['bins'].astype(str).map(lambda x: '-'.join(x[1:-1].split(',')))
-
-    #groups.index = groups.index.astype(str).map(lambda x: '-'.join(x[1:-1].split(',')))
-    #st.bar_chart(groups)
-
-    # Creating a bar chart using Matplotlib
-    #fig, ax = plt.subplots()
-    #groups.plot(kind='bar', stacked=True, ax=ax)
-
-    # Rotating x-axis labels
-    #plt.xticks(rotation='horizontal')
-
-    # Displaying the chart in Streamlit
-    #st.pyplot(fig)
-
-    melted = groups.melt('bins', var_name='category', value_name='value')
-
-    # Create a stacked bar chart
-    chart = alt.Chart(melted).mark_bar().encode(
-        x=alt.X('bins:O', axis=alt.Axis(labelAngle=-20)),  # O for ordinal
-        y='value:Q',  # Q for quantitative
-        color='category:N',  # N for nominal
-        order=alt.Order('category', sort='ascending')  # Sort the stack order
-    ).properties(
-        width=600,
-        height=400
-    )
-    st.altair_chart(chart, use_container_width=True)
-
-elif vis == 'linjediagram':
-    lines = a
-    #lines.year = lines.year.apply(lambda x:int(x))
-    lines = lines.set_index('year')[ct.columns]
-    #st.write(lines)
-    st.line_chart(lines) #.rolling(st.session_state.get('rolling',1)).mean())
-    #lines
-
+#st.write(search_expr)
+if search_expr == ['']:
+    st.write('Legg inn noen ord adskilt med komma')
 else:
-    pass
+    counts = counting(corpus, search_expr)
+    ct = counts.transpose()
+
+    a = pd.concat([corpus.set_index('dhlabid')["title authors year".split()], ct], axis = 1).reset_index()
+
+    if vis == 'dataramme':
+        a['bins'] = pd.cut(a.year, num, precision=0)
+        groups = a.groupby('bins', observed = True).sum()[ct.columns]
+        st.write(groups)
+
+    elif vis == 'søylediagram':
+        a['bins'] = pd.cut(a.year, num, precision=0)
+        groups = a.groupby('bins', observed = True).sum().reset_index()
+        columns_to_select = ['bins'] + [col for col in ct.columns if col in groups.columns]
+        groups = groups[columns_to_select]
+
+        # Now you can safely access 'bins' column
+        #groups['bins'] = groups['bins'].astype(str).map(lambda x: '-'.join(x[1:-1].split(',')))
+        groups['bins'] = groups['bins'].astype(str).map(
+            lambda x: '-'.join([str(int(float(edge))) for edge in x[1:-1].split(',')])
+        )
+        #groups['bins'] = groups['bins'].astype(str).map(lambda x: '-'.join(x[1:-1].split(',')))
+
+        #groups.index = groups.index.astype(str).map(lambda x: '-'.join(x[1:-1].split(',')))
+        #st.bar_chart(groups)
+
+        # Creating a bar chart using Matplotlib
+        #fig, ax = plt.subplots()
+        #groups.plot(kind='bar', stacked=True, ax=ax)
+
+        # Rotating x-axis labels
+        #plt.xticks(rotation='horizontal')
+
+        # Displaying the chart in Streamlit
+        #st.pyplot(fig)
+
+        melted = groups.melt('bins', var_name='category', value_name='value')
+
+        # Create a stacked bar chart
+        chart = alt.Chart(melted).mark_bar().encode(
+            x=alt.X('bins:O', axis=alt.Axis(labelAngle=-20)),  # O for ordinal
+            y='value:Q',  # Q for quantitative
+            color='category:N',  # N for nominal
+            order=alt.Order('category', sort='ascending')  # Sort the stack order
+        ).properties(
+            width=600,
+            height=400
+        )
+        st.altair_chart(chart, use_container_width=True)
+
+    elif vis == 'linjediagram':
+        lines = a
+        #lines.year = lines.year.apply(lambda x:int(x))
+        lines = lines.set_index('year')[ct.columns]
+        #st.write(lines)
+        st.line_chart(lines) #.rolling(st.session_state.get('rolling',1)).mean())
+        #lines
+
+    else:
+        pass
 

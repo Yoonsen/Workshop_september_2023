@@ -36,12 +36,12 @@ barn_år = make_splits(barn)
 kudos_år = make_splits(kudos)
 
 corpus_col, year_col, _ = st.columns([2,5,3])
-if "corpus_name" not in st.session_state:
-    st.session_state.corpus_name = 'barn'
+#if "corpus_name" not in st.session_state:
+#    st.session_state.corpus_name = 'barn'
 
 choices = ['kudos', 'barn']
 with corpus_col:
-    corpus_name = st.selectbox("Velg korpus", choices, index=choices.index(st.session_state.corpus_name), key='corpus_name')
+    corpus_name = st.selectbox("Velg korpus", choices, index=choices.index(st.session_state.get('corpus_name','barn')), key='corpus_name')
     if corpus_name == 'kudos':
         korpus = kudos_år
     elif corpus_name == 'barn':
@@ -104,7 +104,7 @@ str_map = {
 }
 
 if st.session_state.periods != []:                                    
-    for reduction in ['literary_str','subject_str', 'author_str', 'title_str']:
+    for reduction in ['literary_str','subject_str', 'author_str', 'title_str', 'publisher_str']:
         if st.session_state[reduction].strip() != '':
             st.write(reduction,'sub')
             df2 = pd.concat([
@@ -112,7 +112,7 @@ if st.session_state.periods != []:
                 for k in period])[cols]
             st.session_state['korpus'] = st.session_state['korpus'].merge(df2, how = 'inner')
 else:
-    for reduction in ['literary_str','subject_str', 'author_str', 'title_str']:
+    for reduction in ['literary_str','subject_str', 'author_str', 'title_str', 'publisher_str']:
         if st.session_state[reduction].strip() != '':
             st.write(reduction,'all')
             df2 = pd.concat([
