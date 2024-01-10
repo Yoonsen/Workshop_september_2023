@@ -119,11 +119,11 @@ if samplesize < len(concord_dh):
         #st.markdown(konkordans.to_html(escape=False), unsafe_allow_html=True)
     
 else:
-    if concord_dh.size == 0:
+    if len(concord_dh) == 0:
         st.write(f"Ingen treff")
         konkordans = pd.DataFrame()
     else:
-        st.write(f"Viser alle {concord_dh.size} konkordansene ")
+        st.write(f"Viser alle {len(concord_dh)} konkordansene ")
         konkordans = set_html_link_conc(concord_dh, corpus, words)
 
 st.markdown(konkordans.to_html(escape=False), unsafe_allow_html=True)
