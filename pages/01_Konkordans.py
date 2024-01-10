@@ -86,13 +86,14 @@ words = st.text_input(
     help="Bruk anførselstegn for å gruppere fraser. Trunker med * etter ord. Kombiner med OR eller AND. For ord nær hverandre bruk NEAR(ord1 ord2, Antall ord i mellom)")
 
 concord_dh = konk(corpus = corpus, query = words) 
+st.write('antall konk', len(concord_dh))
 
 samplesize = int(
     st.number_input(
         "Vis et visst antall konkordanser i gangen:", 
-        min_value=5,
-        value=100, 
-        help="Minste verdi er 5, default er 100"
+        min_value = 5,
+        value = 100, 
+        help = "Minste verdi er 5, default er 100"
     )
 )
 
@@ -110,7 +111,7 @@ st.markdown(f"## Konkordanser for __{words}__")
 
 st.session_state['counts'] = len(concord_dh)
 
-if samplesize > len(concord_dh):
+if samplesize < len(concord_dh):
     konkordans = set_html_link_conc(concord_dh.sample(samplesize), corpus, words)
     if st.button(f"Klikk her for flere konkordanser. Sampler {samplesize} av {concord_dh.size}"):
         #st.write('click')
