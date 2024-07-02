@@ -124,6 +124,6 @@ else:
 kdict = {k:len(korpus[k]) for k in korpus.keys() }
 
 #st.write(f'korpuset inneholder {kdict}')
-st.write(f"##  Utvalg på oppunder 100 rader fra korpuset med {' '.join(period)} med {len(st.session_state['korpus'])} dokumenter")
+st.write(f"##  Rader fra korpuset (max 10 000) {' '.join(period)} med {len(st.session_state['korpus'])} dokumenter")
 
 st.dataframe(st.session_state['korpus'].sample(min(10000, len(st.session_state['korpus'])))[["authors","publisher","title","year","literaryform","subjects"]].style.format(thousands=''), hide_index=True)
