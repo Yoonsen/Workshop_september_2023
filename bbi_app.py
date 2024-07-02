@@ -13,7 +13,7 @@ st.write('---')
 
 @st.cache_data()
 def korpus():
-    kudos = pd.read_csv("kudos.csv").fillna('').drop_duplicates().fillna('').set_index('dhlabid').reset_index()
+    kudos = pd.read_csv("kudos_ext.csv").fillna('').drop_duplicates().fillna('').set_index('dhlabid').reset_index()
     barn = pd.read_csv("barn.csv").fillna('').drop_duplicates().fillna('').set_index('dhlabid').reset_index()
     barn.year = barn.year.replace('', np.nan)
     kudos.year = kudos.year.replace('', np.nan)
