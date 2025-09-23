@@ -26,6 +26,7 @@ def concordance(
     if words is None:
         return {}  # exit condition
     else:
+        #st.write("antall urner:", len(urns))
         params = {"dhlabids": urns, "query": words, "window": window, "limit": limit}
         r = requests.post(dh.constants.BASE_URL + "/conc", json=params)
         if r.status_code == 200:
@@ -72,27 +73,28 @@ corpus = st.session_state['korpus']
 
 
 
-st.title(f'Søk etter uttrykk i korpuset "{st.session_state.corpus_name}"')
-
+st.title(f'Søk etter uttrykk i korpuset "{st.session_state.corpus_name}" med {len(st.session_state.korpus)} dokumenter')
 
     
-if not 'konk' in st.session_state:
-    st.session_state['konk'] = 'mangfold'
+#if not 'konk' in st.session_state:
+#    st.session_state['konk'] = 'mangfold'
 
 words = st.text_input(
     'Søk etter ord og fraser', 
-    st.session_state['konk'],
+    st.session_state.get('konk',''),
     key='konk',
     help="Bruk anførselstegn for å gruppere fraser. Trunker med * etter ord. Kombiner med OR eller AND. For ord nær hverandre bruk NEAR(ord1 ord2, Antall ord i mellom)")
 
-concord_dh = konk(corpus = corpus, query = words) 
+concord_dh = konk(corpus = st.session_state.korpus, query = words) 
+#st.write('antall konk', len(concord_dh))
 
 samplesize = int(
     st.number_input(
         "Vis et visst antall konkordanser i gangen:", 
-        min_value=5,
-        value=100, 
-        help="Minste verdi er 5, default er 100"
+        min_value = 5,
+        value = st.session_state.get('antall_konk', 100), 
+        help = "Minste verdi er 5, default er 100",
+        key = 'antall_konk'
     )
 )
 
@@ -110,22 +112,22 @@ st.markdown(f"## Konkordanser for __{words}__")
 
 st.session_state['counts'] = len(concord_dh)
 
-if samplesize > len(concord_dh):
+if samplesize < len(concord_dh):
     konkordans = set_html_link_conc(concord_dh.sample(samplesize), corpus, words)
-    if st.button(f"Klikk her for flere konkordanser. Sampler {samplesize} av {concord_dh.size}"):
+    if st.button(f"Klikk her for flere konkordanser. Sampler {samplesize} av {len(concord_dh)}"):
         #st.write('click')
         konkordans = set_html_link_conc(concord_dh.sample(samplesize), corpus, words)
         #st.markdown(konkordans.to_html(escape=False), unsafe_allow_html=True)
     
 else:
-    if concord_dh.size == 0:
+    if len(concord_dh) == 0:
         st.write(f"Ingen treff")
         konkordans = pd.DataFrame()
     else:
-        st.write(f"Viser alle {concord_dh.size} konkordansene ")
+        st.write(f"Viser alle {len(concord_dh)} konkordansene ")
         konkordans = set_html_link_conc(concord_dh, corpus, words)
 
-st.markdown(konkordans.to_html(escape=False), unsafe_allow_html=True)
+st.markdown(konkordans.to_html(escape=False, index=False), unsafe_allow_html=True)
 
 
 

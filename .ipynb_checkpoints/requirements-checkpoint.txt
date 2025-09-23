@@ -1,0 +1,6 @@
+dhlab
+matplotlib
+pandas
+streamlit
+openpyxl
+beautifulsoup4

@@ -7,60 +7,134 @@ import urllib
 import os
 import re
 import matplotlib.pyplot as plt
+import altair as alt
 
-max_conc = 20000
-
-
-if not 'bins' in st.session_state:
-    st.session_state['bins'] = 10
+@st.cache_data()
+def counting(corpus, search_expr):
+    return dh.Counts(corpus, search_expr).frame
 
 st.session_state.update(st.session_state)
 
+count_conc = st.session_state['counts']
 corpus = st.session_state['korpus']
 
-counts = st.session_state['counts']
 
 st.title('Oversikt')
-col1, col2, _ = st.columns([2, 2, 5])
+
+col1, col2, col3, _ = st.columns([2, 2, 3, 5])
+
+if "rolling" not in st.session_state:
+    st.session_state.rolling = 5
+
+if "type" not in st.session_state:
+    st.session_state.type = "søylediagram"
+
+if "bins" not in st.session_state:
+    st.session_state.bins = 10
+
+if "freq_words" not in st.session_state:
+    st.session_state.freq_words = ''
+    
+select_options = [ 'linjediagram', 'søylediagram','dataramme']
+
 with col1:
     if st.session_state.get('type', 'linjediagram') == 'linjediagram':
-        num = st.number_input("Angi glatting", min_value = 1, max_value= 20, value =1, key="rolling", disabled = True)
+        num = st.number_input(
+            "Angi glatting", 
+            min_value = 1, 
+            max_value= 20, 
+            value = st.session_state.rolling, 
+            key="rolling", 
+            disabled = True
+        )
     else:
-        num = st.number_input("Angi antall grupper", min_value = 3, max_value= 20, value =10, key="bins")
+        num = st.number_input(
+            "Angi antall grupper", 
+            min_value = 3, 
+            max_value= 20, 
+            value = st.session_state.bins, 
+            key="bins"
+        )
+
 with col2:
-    vis = st.selectbox("Vis som", [ 'linjediagram', 'søylediagram'], key='type')
+    vis = st.selectbox(
+        "Vis som", 
+        select_options, 
+        index = select_options.index(st.session_state.type),                
+        key='type'
+    )
 
+with col3:
+    words = st.text_input(
+        "Søk etter frekvens for", 
+        value = st.session_state['freq_words'],
+        key = "freq_words",
+        help = "Skriv en liste med ord som skal sammenlignes adskilt med komma"
+    )                   
+    search_expr = [w.strip() for w in words.split(',')]
 
-
-
-st.write(corpus.sample(2))
-st.write(counts.sample(2))
-a = pd.concat([corpus.set_index('dhlabid'), counts], axis = 1).reset_index()[['urn','year', 'freq']].dropna()
-#a = a[a.year>0]
-
-st.write(f"Antallet avsnitt som gir treff på __{st.session_state['konk']}__.")
-st.dataframe(counts.sample(100, replace=True))
-
-if vis == 'dataramme':
-    st.write(groups)
-
-elif vis == 'søylediagram':
-    #st.write(a.year)
-    a['bins'] = pd.cut(a.year, num, precision=0)
-    st.dataframe(a)
-    groups = a.groupby('bins').sum()[['freq']]
-    st.dataframe(groups)
-    groups.index = groups.index.astype(str).map(lambda x: '-'.join(x[1:-1].split(',')))
-    st.bar_chart(groups)
-
-elif vis == 'linjediagram':
-    lines = a[['year','freq']]
-    #lines.year = lines.year.apply(lambda x:int(x))
-    lines = lines.set_index('year')
-    #lines.index = pd.to_datetime(lines.index.astype(int))
-    st.line_chart(lines) #.rolling(st.session_state.get('rolling',1)).mean())
-    #lines
-
+#st.write(search_expr)
+if search_expr == ['']:
+    st.write('Legg inn noen ord adskilt med komma')
 else:
-    pass
+    counts = counting(corpus, search_expr)
+    ct = counts.transpose()
+
+    a = pd.concat([corpus.set_index('dhlabid')["title authors year".split()], ct], axis = 1).reset_index()
+
+    if vis == 'dataramme':
+        a['bins'] = pd.cut(a.year, num, precision=0)
+        groups = a.groupby('bins', observed = True).sum()[ct.columns]
+        st.write(groups)
+
+    elif vis == 'søylediagram':
+        a['bins'] = pd.cut(a.year, num, precision=0)
+        groups = a.groupby('bins', observed = True).sum().reset_index()
+        columns_to_select = ['bins'] + [col for col in ct.columns if col in groups.columns]
+        groups = groups[columns_to_select]
+
+        # Now you can safely access 'bins' column
+        #groups['bins'] = groups['bins'].astype(str).map(lambda x: '-'.join(x[1:-1].split(',')))
+        groups['bins'] = groups['bins'].astype(str).map(
+            lambda x: '-'.join([str(int(float(edge))) for edge in x[1:-1].split(',')])
+        )
+        #groups['bins'] = groups['bins'].astype(str).map(lambda x: '-'.join(x[1:-1].split(',')))
+
+        #groups.index = groups.index.astype(str).map(lambda x: '-'.join(x[1:-1].split(',')))
+        #st.bar_chart(groups)
+
+        # Creating a bar chart using Matplotlib
+        #fig, ax = plt.subplots()
+        #groups.plot(kind='bar', stacked=True, ax=ax)
+
+        # Rotating x-axis labels
+        #plt.xticks(rotation='horizontal')
+
+        # Displaying the chart in Streamlit
+        #st.pyplot(fig)
+
+        melted = groups.melt('bins', var_name='category', value_name='value')
+
+        # Create a stacked bar chart
+        chart = alt.Chart(melted).mark_bar().encode(
+            x=alt.X('bins:O', axis=alt.Axis(labelAngle=-20)),  # O for ordinal
+            y='value:Q',  # Q for quantitative
+            color='category:N',  # N for nominal
+            order=alt.Order('category', sort='ascending')  # Sort the stack order
+        ).properties(
+            width=600,
+            height=400
+        )
+        st.altair_chart(chart, use_container_width=True)
+
+    elif vis == 'linjediagram':
+        lines = a
+        #lines.year = lines.year.apply(lambda x:int(x))
+        lines = lines.set_index('year')[ct.columns]
+        #st.write(lines)
+        st.line_chart(lines) #.rolling(st.session_state.get('rolling',1)).mean())
+        #lines
+
+    else:
+        pass
 
