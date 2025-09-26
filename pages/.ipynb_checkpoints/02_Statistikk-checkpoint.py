@@ -17,7 +17,8 @@ st.session_state.update(st.session_state)
 
 count_conc = st.session_state['counts']
 corpus = st.session_state['korpus']
-
+corpus = corpus.drop_duplicates(subset="dhlabid", keep="first").copy()
+corpus["dhlabid"] = corpus["dhlabid"].astype(str)
 
 st.title('Oversikt')
 
@@ -78,8 +79,15 @@ if search_expr == ['']:
     st.write('Legg inn noen ord adskilt med komma')
 else:
     counts = counting(corpus, search_expr)
-    ct = counts.transpose()
 
+    ct = counts.T.copy()
+    ct.index = ct.index.astype(str)
+    ct = ct[~ct.index.duplicated(keep="first")]   
+    
+    meta = corpus[["dhlabid","title","authors","year"]]
+    ct_reset = ct.reset_index().rename(columns={"index":"dhlabid"})
+    #a = meta.merge(ct_reset, on="dhlabid", how="left")
+    
     a = pd.concat([corpus.set_index('dhlabid')["title authors year".split()], ct], axis = 1).reset_index()
 
     if vis == 'dataramme':
