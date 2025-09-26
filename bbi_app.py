@@ -47,6 +47,8 @@ with corpus_col:
     elif corpus_name == 'barn':
         korpus = barn_år
 
+#st.session_state["corpus_name"] = corpus_name
+
 if "counts" not in st.session_state:
     st.session_state["counts"] = 0
 
