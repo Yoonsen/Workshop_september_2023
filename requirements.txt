@@ -4,3 +4,4 @@ pandas
 streamlit
 openpyxl
 beautifulsoup4
+altair<5  
